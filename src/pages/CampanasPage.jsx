@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Megaphone, RefreshCw, Clock, User, PlusCircle, CheckCircle2 } from 'lucide-react'
+import { Megaphone, RefreshCw, Clock, User, PlusCircle, CheckCircle2, Briefcase } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import PageHead from '../components/layout/PageHead.jsx'
 import Loader from '../components/ui/Loader.jsx'
@@ -94,6 +94,9 @@ export default function CampanasPage() {
               <div className="cm-item-main">
                 <strong>{it.cliente_nombre}</strong>
                 <small><User size={13} /> {it.cliente_id}</small>
+                {esSupervisor && it.asesor_nombre && (
+                  <small style={{marginTop:2}}><Briefcase size={12} /> {it.asesor_codigo} · {it.asesor_nombre}</small>
+                )}
               </div>
               <div className="cm-item-center">
                 <Money value={it.monto_ofertado} colored />
