@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   FileText, PlusCircle, RefreshCw, StickyNote, Send,
   CheckCircle2, XCircle, Gauge, Search, ShieldCheck, Ban,
-  Upload, DollarSign, Info, Calendar, History,
+  Upload, DollarSign, Info, Calendar, History, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import PageHead from '../components/layout/PageHead.jsx'
 import Loader from '../components/ui/Loader.jsx'
@@ -31,6 +31,9 @@ export default function SolicitudesPage() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [pagina, setPagina] = useState(1)
+  const [totalPaginas, setTotalPaginas] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
 
   // Notas
   const [notasDe, setNotasDe] = useState(null)
@@ -68,13 +71,18 @@ export default function SolicitudesPage() {
   const [buroLoading, setBuroLoading] = useState(false)
   const [evalError, setEvalError] = useState(null)
 
-  const cargar = useCallback(() => {
+  const cargar = useCallback((p) => {
     setLoading(true)
-    listarSolicitudes()
-      .then((data) => setItems(data || []))
+    const pg = p ?? pagina
+    listarSolicitudes({ pagina: pg, por_pagina: 30 })
+      .then((data) => {
+        setItems(data.items || [])
+        setTotalPaginas(data.total_paginas || 1)
+        setTotalItems(data.total || 0)
+      })
       .catch((err) => setError(extractError(err)))
       .finally(() => setLoading(false))
-  }, [])
+  }, [pagina])
 
   useEffect(() => { cargar() }, [cargar])
 
@@ -265,11 +273,11 @@ export default function SolicitudesPage() {
     <>
       <PageHead
         title={esSupervisor ? "Solicitudes del equipo" : "Mis solicitudes"}
-        subtitle={esSupervisor ? "Todas las solicitudes de crédito del mes" : "Tablero de estado de tus expedientes de crédito"}
+        subtitle={`${totalItems} solicitudes · Pág. ${pagina}/${totalPaginas}`}
         icon={FileText}
         actions={
           <>
-            <button className="hb-btn hb-btn-gray hb-btn-sm" onClick={cargar}><RefreshCw size={15} /> Actualizar</button>
+            <button className="hb-btn hb-btn-gray hb-btn-sm" onClick={() => cargar(pagina)}><RefreshCw size={15} /> Actualizar</button>
             <button className="hb-btn" onClick={() => navigate('/solicitudes/nueva')}><PlusCircle size={16} /> Nueva</button>
           </>
         }
@@ -281,7 +289,7 @@ export default function SolicitudesPage() {
         <Loader text="Cargando solicitudes…" />
       ) : items.length === 0 ? (
         <div className="hb-card hb-table-empty">
-          Aún no has registrado solicitudes este mes.
+          No hay solicitudes registradas.
           <div style={{ marginTop: 14 }}>
             <button className="hb-btn" onClick={() => navigate('/solicitudes/nueva')}><PlusCircle size={16} /> Registrar la primera</button>
           </div>
@@ -350,6 +358,18 @@ export default function SolicitudesPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {!loading && items.length > 0 && totalPaginas > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 16 }}>
+          <button className="hb-btn hb-btn-sm hb-btn-gray" disabled={pagina <= 1} onClick={() => { const np = pagina - 1; setPagina(np); cargar(np) }}>
+            <ChevronLeft size={16} /> Anterior
+          </button>
+          <span style={{ fontSize: 14, color: 'var(--hb-muted)' }}>{pagina} / {totalPaginas}</span>
+          <button className="hb-btn hb-btn-sm hb-btn-gray" disabled={pagina >= totalPaginas} onClick={() => { const np = pagina + 1; setPagina(np); cargar(np) }}>
+            Siguiente <ChevronRight size={16} />
+          </button>
         </div>
       )}
 

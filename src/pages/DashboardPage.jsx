@@ -33,11 +33,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let alive = true
-    Promise.allSettled([listarCartera(), listarSolicitudes()])
+    Promise.allSettled([listarCartera({ pagina: 1, por_pagina: 100 }), listarSolicitudes({ pagina: 1, por_pagina: 100 })])
       .then(([c, s]) => {
         if (!alive) return
-        if (c.status === 'fulfilled') setCartera(c.value || [])
-        if (s.status === 'fulfilled') setSolicitudes(s.value || [])
+        if (c.status === 'fulfilled') setCartera(c.value?.items || [])
+        if (s.status === 'fulfilled') setSolicitudes(s.value?.items || [])
         if (c.status === 'rejected' && s.status === 'rejected') {
           setError(extractError(c.reason, 'No se pudieron cargar los datos.'))
         }

@@ -1,8 +1,9 @@
 import api from './api.js'
 
-/** Historial / tablero de solicitudes del asesor. GET /solicitudes */
-export async function listarSolicitudes() {
-  const { data } = await api.get('/solicitudes')
+/** Historial / tablero de solicitudes con paginación. GET /solicitudes?pagina=&por_pagina= */
+export async function listarSolicitudes({ pagina = 1, por_pagina = 30 } = {}) {
+  const params = { pagina, por_pagina }
+  const { data } = await api.get('/solicitudes', { params })
   return data
 }
 

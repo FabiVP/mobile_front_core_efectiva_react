@@ -1,8 +1,8 @@
 import api from './api.js'
 
-/** Cartera del día del asesor autenticado. GET /cartera?fecha=YYYY-MM-DD */
-export async function listarCartera(fecha) {
-  const params = fecha ? { fecha } : {}
+/** Cartera del asesor autenticado con paginación. GET /cartera?pagina=&por_pagina= */
+export async function listarCartera({ pagina = 1, por_pagina = 30 } = {}) {
+  const params = { pagina, por_pagina }
   const { data } = await api.get('/cartera', { params })
   return data
 }

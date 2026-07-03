@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Briefcase, MapPin, CheckCircle2, FileText, RefreshCw, ClipboardCheck, IdCard,
+  Briefcase, MapPin, CheckCircle2, FileText, RefreshCw, ClipboardCheck, IdCard, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import PageHead from '../components/layout/PageHead.jsx'
@@ -28,18 +28,26 @@ export default function CarteraPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [ok, setOk] = useState(null)
-  const [target, setTarget] = useState(null) // item en gestión
+  const [target, setTarget] = useState(null)
   const [resultado, setResultado] = useState('visitado')
   const [observacion, setObservacion] = useState('')
   const [saving, setSaving] = useState(false)
+  const [pagina, setPagina] = useState(1)
+  const [totalPaginas, setTotalPaginas] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
 
-  const cargar = useCallback(() => {
+  const cargar = useCallback((p) => {
     setLoading(true)
-    listarCartera()
-      .then((data) => setItems(data || []))
+    const pg = p ?? pagina
+    listarCartera({ pagina: pg, por_pagina: 30 })
+      .then((data) => {
+        setItems(data.items || [])
+        setTotalPaginas(data.total_paginas || 1)
+        setTotalItems(data.total || 0)
+      })
       .catch((err) => setError(extractError(err)))
       .finally(() => setLoading(false))
-  }, [])
+  }, [pagina])
 
   useEffect(() => { cargar() }, [cargar])
 
@@ -67,14 +75,19 @@ export default function CarteraPage() {
 
   const pendientes = items.filter((i) => i.estado_visita === 'pendiente').length
 
+  const irPagina = (p) => {
+    setPagina(p)
+    cargar(p)
+  }
+
   return (
     <>
       <PageHead
-        title="Cartera del día"
-        subtitle={`${items.length} clientes asignados · ${pendientes} pendientes de visita`}
+        title="Cartera"
+        subtitle={`${totalItems} clientes · Pág. ${pagina}/${totalPaginas} · ${pendientes} pendientes`}
         icon={Briefcase}
         actions={
-          <button className="hb-btn hb-btn-gray hb-btn-sm" onClick={cargar}>
+          <button className="hb-btn hb-btn-gray hb-btn-sm" onClick={() => cargar(pagina)}>
             <RefreshCw size={15} /> Actualizar
           </button>
         }
@@ -134,6 +147,18 @@ export default function CarteraPage() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {!loading && items.length > 0 && totalPaginas > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 16 }}>
+          <button className="hb-btn hb-btn-sm hb-btn-gray" disabled={pagina <= 1} onClick={() => irPagina(pagina - 1)}>
+            <ChevronLeft size={16} /> Anterior
+          </button>
+          <span style={{ fontSize: 14, color: 'var(--hb-muted)' }}>{pagina} / {totalPaginas}</span>
+          <button className="hb-btn hb-btn-sm hb-btn-gray" disabled={pagina >= totalPaginas} onClick={() => irPagina(pagina + 1)}>
+            Siguiente <ChevronRight size={16} />
+          </button>
         </div>
       )}
 
