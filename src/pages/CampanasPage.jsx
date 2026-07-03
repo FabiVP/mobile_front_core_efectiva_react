@@ -68,22 +68,17 @@ export default function CampanasPage() {
 
   return (
     <>
-      <div style={{background:'red',color:'white',padding:8}}>
-        DEBUG: perfil={user?.perfil} esSupervisor={String(esSupervisor)} user={JSON.stringify(user)}
-      </div>
       <PageHead
         title="Campañas activas"
         subtitle={`${items.length} campañas · S/ ${totalOfertado.toLocaleString('es-PE', { maximumFractionDigits: 0 })} ofertado`}
         icon={Megaphone}
-        actions={
-          <>
-            <button className="hb-btn hb-btn-gray hb-btn-sm" onClick={cargar}><RefreshCw size={15} /> Actualizar</button>
-            {esSupervisor && (
-              <button className="hb-btn hb-btn-sm" onClick={() => setShowForm(true)}><PlusCircle size={16} /> Nueva campaña</button>
-            )}
-          </>
-        }
       />
+      <div style={{display:'flex',gap:8,marginBottom:16,flexWrap:'wrap'}}>
+        <button className="hb-btn hb-btn-gray hb-btn-sm" onClick={cargar}><RefreshCw size={15} /> Actualizar</button>
+        {esSupervisor && (
+          <button className="hb-btn hb-btn-sm" onClick={() => setShowForm(true)}><PlusCircle size={16} /> Nueva campaña</button>
+        )}
+      </div>
 
       {error && <Alert tipo="error">{error}</Alert>}
       {ok && <Alert tipo="success">{ok}</Alert>}
